@@ -17,10 +17,23 @@ Components used
 * ``newlib-2.1.0``
 
 --------------------------------------------------------------------------
-Instructions
+Installation
 --------------------------------------------------------------------------
 
-Untar all to ``src``. Start version control. First build ``binutils``::
+If everything is configured correctly, you can simply use the makefile
+provided::
+
+  % make build-all PREFIX=<prefix>
+
+If ``PREFIX`` is not provided, it will install the cross compiler under
+``./xcc``.
+
+--------------------------------------------------------------------------
+Manual Installation
+--------------------------------------------------------------------------
+
+Use these instructions if the above fails.  Untar all to ``src``. Start
+version control. First build ``binutils``::
 
   % cd src/binutils-2.19.1
   % mkdir build-pydgin-arm
