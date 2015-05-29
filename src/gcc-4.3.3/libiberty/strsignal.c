@@ -404,40 +404,40 @@ call to @code{strsignal}.
 
 #ifndef HAVE_STRSIGNAL
 
-const char *
-strsignal (int signo)
-{
-  const char *msg;
-  static char buf[32];
-
-#ifndef HAVE_SYS_SIGLIST
-
-  if (signal_names == NULL)
-    {
-      init_signal_tables ();
-    }
-
-#endif
-
-  if ((signo < 0) || (signo >= sys_nsig))
-    {
-      /* Out of range, just return NULL */
-      msg = NULL;
-    }
-  else if ((sys_siglist == NULL) || (sys_siglist[signo] == NULL))
-    {
-      /* In range, but no sys_siglist or no entry at this index. */
-      sprintf (buf, "Signal %d", signo);
-      msg = (const char *) buf;
-    }
-  else
-    {
-      /* In range, and a valid message.  Just return the message. */
-      msg = (const char *) sys_siglist[signo];
-    }
-  
-  return (msg);
-}
+// const char *
+// strsignal (int signo)
+// {
+//   const char *msg;
+//   static char buf[32];
+// 
+// #ifndef HAVE_SYS_SIGLIST
+// 
+//   if (signal_names == NULL)
+//     {
+//       init_signal_tables ();
+//     }
+// 
+// #endif
+// 
+//   if ((signo < 0) || (signo >= sys_nsig))
+//     {
+//       /* Out of range, just return NULL */
+//       msg = NULL;
+//     }
+//   else if ((sys_siglist == NULL) || (sys_siglist[signo] == NULL))
+//     {
+//       /* In range, but no sys_siglist or no entry at this index. */
+//       sprintf (buf, "Signal %d", signo);
+//       msg = (const char *) buf;
+//     }
+//   else
+//     {
+//       /* In range, and a valid message.  Just return the message. */
+//       msg = (const char *) sys_siglist[signo];
+//     }
+//   
+//   return (msg);
+// }
 
 #endif /* ! HAVE_STRSIGNAL */
 
@@ -548,22 +548,22 @@ followed by a newline.
 
 #ifndef HAVE_PSIGNAL
 
-void
-psignal (int signo, char *message)
-{
-  if (signal_names == NULL)
-    {
-      init_signal_tables ();
-    }
-  if ((signo <= 0) || (signo >= sys_nsig))
-    {
-      fprintf (stderr, "%s: unknown signal\n", message);
-    }
-  else
-    {
-      fprintf (stderr, "%s: %s\n", message, sys_siglist[signo]);
-    }
-}
+//void
+//psignal (int signo, char *message)
+//{
+//  if (signal_names == NULL)
+//    {
+//      init_signal_tables ();
+//    }
+//  if ((signo <= 0) || (signo >= sys_nsig))
+//    {
+//      fprintf (stderr, "%s: unknown signal\n", message);
+//    }
+//  else
+//    {
+//      fprintf (stderr, "%s: %s\n", message, sys_siglist[signo]);
+//    }
+//}
 
 #endif	/* ! HAVE_PSIGNAL */
 

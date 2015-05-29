@@ -3465,6 +3465,11 @@ case "${target}" in
   aarch64*-*-* )
     libgloss_dir=aarch64
     ;;
+  # berkin: adding brgarm (hack I had to modify configure as well because
+  # it complained about the autoconf version)
+  arm-none-eabi)
+    libgloss_dir=brgarm
+    ;;
   arm*-*-*)
     libgloss_dir=arm
     ;;

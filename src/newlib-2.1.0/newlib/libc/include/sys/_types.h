@@ -17,14 +17,20 @@ typedef long _off_t;
 #endif
 
 #ifndef __dev_t_defined
-typedef short __dev_t;
+//typedef short __dev_t;
+// berkin hack:
+typedef long long __dev_t;
 #endif
 
 #ifndef __uid_t_defined
-typedef unsigned short __uid_t;
+//typedef unsigned short __uid_t;
+// berkin hack:
+typedef unsigned long __uid_t;
 #endif
 #ifndef __gid_t_defined
-typedef unsigned short __gid_t;
+//typedef unsigned short __gid_t;
+// berkin hack:
+typedef unsigned long __gid_t;
 #endif
 
 #ifndef __off64_t_defined

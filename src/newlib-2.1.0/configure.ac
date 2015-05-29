@@ -798,6 +798,10 @@ case "${target}" in
   aarch64*-*-* )
     libgloss_dir=aarch64
     ;;
+  # berkin: adding brgarm
+  arm-none-eabi)
+    libgloss_dir=brgarm
+    ;;
   arm*-*-*)
     libgloss_dir=arm
     ;;

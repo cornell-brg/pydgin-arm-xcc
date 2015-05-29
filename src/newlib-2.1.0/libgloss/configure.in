@@ -145,7 +145,11 @@ case "${target}" in
   rx*-*-elf)
 	AC_CONFIG_SUBDIRS([rx])
 	;;
-  arm*-*-elf | arm*-*-coff | arm*-*-*)
+  # berkin: hack arm-none-eabi tuple to use our hacky backend
+  arm-none-eabi)
+  AC_CONFIG_SUBDIRS([brgarm])
+  ;;
+  arm*-*-elf | arm*-*-coff)
 	AC_CONFIG_SUBDIRS([arm])
 	;;
   spu-*-elf)

@@ -1,0 +1,243 @@
+#=========================================================================
+# Makefile for brgarm libgloss
+#=========================================================================
+# This makefile builds a brgarm version of the narrow operating system
+# interface for newlib, as well as any other brgarm specific system
+# headers and sources. It also builds a simple crt1.o and installs the
+# included brgarm linker script. Currently there is no support for
+# multilib.
+
+#-------------------------------------------------------------------------
+# Source files
+#-------------------------------------------------------------------------
+
+gloss_hdrs = \
+  machine/syscfg.h \
+  machine/syscall.h \
+  machine/cop0.h \
+  machine/types.h \
+  machine/setjmp.h \
+  machine/time.h \
+  machine/timex.h \
+  machine/resource.h \
+
+gloss_srcs = \
+  machine/resource.c \
+  machine/setjmp.S \
+  machine/time.c \
+  machine/timex.c \
+
+# Extra files
+
+crt1_asm      = crt1.S
+linker_script = brgarm.ld
+syscalls_src  = syscalls.c
+
+#-------------------------------------------------------------------------
+# Basic setup
+#-------------------------------------------------------------------------
+
+# Remove all default implicit rules since they can cause subtle bugs
+# and they just make things run slower
+
+.SUFFIXES:
+% : %,v
+% : RCS/%,v
+% : RCS/%
+% : s.%
+% : SCCS/s.%
+
+# Default is to build the prereqs of the all target (defined at bottom)
+
+default : all
+.PHONY : default
+
+# Source directory
+
+obj_dir := .
+src_dir := @srcdir@
+VPATH   := $(src_dir) $(src_dir)/machine
+
+# Installation directories
+
+prefix  := @prefix@
+DESTDIR ?= $(prefix)
+
+install_hdrs_dir := $(DESTDIR)$(prefix)/$(target_alias)/include/machine
+install_libs_dir := $(DESTDIR)$(prefix)/$(target_alias)/lib
+
+#-------------------------------------------------------------------------
+# Programs and flags
+#-------------------------------------------------------------------------
+
+# C compiler
+
+CC            := @CC@
+CFLAGS        := @CFLAGS@
+CPPFLAGS      := -I$(obj_dir) -I$(src_dir)
+COMPILE       := $(CC) -MMD -MP $(CPPFLAGS) $(CFLAGS)
+
+# Library creation
+
+AR            := @AR@
+RANLIB        := @RANLIB@
+
+# Installation
+
+MKINSTALLDIRS := $(src_dir)/mk-install-dirs.sh
+INSTALL       := @INSTALL@
+INSTALL_HDR   := $(INSTALL) -m 444
+INSTALL_LIB   := $(INSTALL) -m 644
+
+#-------------------------------------------------------------------------
+# Build Object File from Syscalls Source
+#-------------------------------------------------------------------------
+# We special case compiling syscalls.c since we want to make sure that
+# we compile with -G0. This prevents the compiler from using gp relative
+# addressing when loading the _end pointer in sbrk.
+
+syscalls_objs = $(patsubst %.c, %.o, $(syscalls_src))
+syscalls_deps = $(patsubst %.c, %.d, $(syscalls_src))
+
+$(syscalls_objs) : %.o : %.c
+	$(COMPILE) -G0 -c $<
+
+objs += $(syscalls_objs)
+deps += $(syscalls_deps)
+junk += $(syscalls_deps) $(syscalls_objs)
+
+#-------------------------------------------------------------------------
+# Build Object Files from C Source
+#-------------------------------------------------------------------------
+
+gloss_c_srcs = $(filter %.c, $(gloss_srcs))
+gloss_c_objs = $(patsubst %.c, %.o, $(notdir $(gloss_c_srcs)))
+gloss_c_deps = $(patsubst %.c, %.d, $(notdir $(gloss_c_srcs)))
+
+$(gloss_c_objs) : %.o : %.c
+	$(COMPILE) -c $<
+
+objs += $(gloss_c_objs)
+deps += $(gloss_c_deps)
+junk += $(gloss_c_deps) $(gloss_c_objs)
+
+#-------------------------------------------------------------------------
+# Build Object Files from Assembly Source
+#-------------------------------------------------------------------------
+
+gloss_asm_srcs = $(filter %.S, $(gloss_srcs))
+gloss_asm_objs = $(patsubst %.S, %.o, $(notdir $(gloss_asm_srcs)))
+gloss_asm_deps = $(patsubst %.S, %.d, $(notdir $(gloss_asm_srcs)))
+
+$(gloss_asm_objs) : %.o : %.S
+	$(COMPILE) -c $<
+
+objs += $(gloss_asm_objs)
+deps += $(gloss_asm_deps)
+junk += $(gloss_asm_deps) $(gloss_asm_objs)
+
+#-------------------------------------------------------------------------
+# Build libgloss.a
+#-------------------------------------------------------------------------
+
+gloss_lib  = libgloss.a
+$(gloss_lib) : $(objs)
+	$(AR) rcv $@ $^
+	$(RANLIB) $@
+
+junk += $(gloss_libs)
+
+install_hdrs += $(gloss_hdrs)
+install_libs += $(gloss_lib)
+
+#-------------------------------------------------------------------------
+# Build crt1.o
+#-------------------------------------------------------------------------
+
+crt1_obj  = $(patsubst %.S, %.o, $(crt1_asm))
+crt1_deps = $(patsubst %.S, %.d, $(crt1_asm))
+
+$(crt1_obj) : %.o : %.S
+	$(COMPILE) -c $<
+
+deps += $(crt1_deps)
+junk += $(crt1_deps) $(crt1_obj)
+
+install_libs += $(crt1_obj)
+
+#-------------------------------------------------------------------------
+# Linker Script
+#-------------------------------------------------------------------------
+# Currently we install the brgarm linker script in the target lib
+# directory. This should by default be part of gcc's search path, and we
+# have also changed mips-brgarm.h so that the default brgarm spec file
+# always includes -Tbrgarm.ld on the linker command line. There is
+# probably a better way to handle setting up the default linker script.
+
+install_libs += $(addprefix $(src_dir)/, $(linker_script))
+
+#-------------------------------------------------------------------------
+# Autodependency files
+#-------------------------------------------------------------------------
+
+-include $(deps)
+
+deps : $(deps)
+.PHONY : deps
+
+#-------------------------------------------------------------------------
+# Installation
+#-------------------------------------------------------------------------
+
+install_hdrs_wdir += $(addprefix $(src_dir)/, $(install_hdrs))
+install-hdrs : $(install_hdrs_wdir)
+	$(MKINSTALLDIRS) $(install_hdrs_dir)
+	for file in $^; do \
+    $(INSTALL_HDR) $$file $(install_hdrs_dir); \
+  done
+
+install-libs : $(install_libs)
+	$(MKINSTALLDIRS) $(install_libs_dir)
+	for file in $^; do \
+    $(INSTALL_LIB) $$file $(install_libs_dir); \
+  done
+
+install : install-hdrs install-libs
+.PHONY : install install-hdrs install-libs
+
+#-------------------------------------------------------------------------
+# Regenerate configure information
+#-------------------------------------------------------------------------
+
+configure_prereq = \
+  $(src_dir)/configure.ac \
+
+$(src_dir)/configure : $(configure_prereq)
+	cd $(src_dir) && autoconf
+
+config.status : $(src_dir)/configure
+	./config.status --recheck
+
+Makefile : $(src_dir)/Makefile.in config.status
+	./config.status
+
+dist_junk += config.status Makefile config.log
+
+#-------------------------------------------------------------------------
+# Default
+#-------------------------------------------------------------------------
+
+all : $(install_libs)
+.PHONY : all
+
+#-------------------------------------------------------------------------
+# Clean up junk
+#-------------------------------------------------------------------------
+
+clean :
+	rm -rf *~ \#* $(junk)
+
+distclean :
+	rm -rf *~ \#* $(junk) $(dist_junk)
+
+.PHONY : clean distclean

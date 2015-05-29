@@ -22,41 +22,71 @@ extern "C" {
 #define stat64 stat
 #endif
 #else
-struct	stat 
+
+// berkin hack
+// this mimics linux-style stat:
+struct stat
 {
-  dev_t		st_dev;
-  ino_t		st_ino;
-  mode_t	st_mode;
-  nlink_t	st_nlink;
-  uid_t		st_uid;
-  gid_t		st_gid;
-  dev_t		st_rdev;
-  off_t		st_size;
-#if defined(__rtems__)
-  struct timespec st_atim;
-  struct timespec st_mtim;
-  struct timespec st_ctim;
-  blksize_t     st_blksize;
-  blkcnt_t	st_blocks;
-#else
-  /* SysV/sco doesn't have the rest... But Solaris, eabi does.  */
-#if defined(__svr4__) && !defined(__PPC__) && !defined(__sun__)
-  time_t	st_atime;
-  time_t	st_mtime;
-  time_t	st_ctime;
-#else
-  time_t	st_atime;
-  long		st_spare1;
-  time_t	st_mtime;
-  long		st_spare2;
-  time_t	st_ctime;
-  long		st_spare3;
-  long		st_blksize;
-  long		st_blocks;
-  long	st_spare4[2];
-#endif
-#endif
+  //                     i  s
+  dev_t		st_dev;     // 0  8
+  // there is a mysterious gap here
+  char    pad0[4];    // 8  4
+  ino_t		st_ino;     // 12 4
+  mode_t	st_mode;    // 16 4
+  nlink_t	st_nlink;   // 20 4
+  uid_t		st_uid;     // 24 4
+  gid_t		st_gid;     // 28 4
+  dev_t		st_rdev;    // 32 4
+  // there is bunch of other stuff here
+  char    pad1[4];    // 36 4
+  off_t		st_size;    // 44 4
+  long		st_blksize; // 48 4
+  long		st_blocks;  // 52 4
+  time_t	st_atime;   // 56 4
+  char		pad2[4];    // 60 4
+  time_t	st_mtime;   // 64 4
+  char		pad3[4];    // 68 4
+  time_t	st_ctime;   // 72 4
+  char		pad4[12];   // 76 12 (complete to 88)
 };
+
+
+// struct	stat 
+// {
+//   dev_t		st_dev;
+//   ino_t		st_ino;
+//   mode_t	st_mode;
+//   nlink_t	st_nlink;
+//   uid_t		st_uid;
+//   gid_t		st_gid;
+//   dev_t		st_rdev;
+//   off_t		st_size;
+// #if defined(__rtems__)
+//   struct timespec st_atim;
+//   struct timespec st_mtim;
+//   struct timespec st_ctim;
+//   blksize_t     st_blksize;
+//   blkcnt_t	st_blocks;
+// #else
+//   /* SysV/sco doesn't have the rest... But Solaris, eabi does.  */
+// #if defined(__svr4__) && !defined(__PPC__) && !defined(__sun__)
+//   time_t	st_atime;
+//   time_t	st_mtime;
+//   time_t	st_ctime;
+// #else
+//   time_t	st_atime;
+//   long		st_spare1;
+//   time_t	st_mtime;
+//   long		st_spare2;
+//   time_t	st_ctime;
+//   long		st_spare3;
+//   long		st_blksize;
+//   long		st_blocks;
+//   long	st_spare4[2];
+// #endif
+// #endif
+//   long  padding[32];
+// };
 
 #if defined(__rtems__)
 #define st_atime st_atim.tv_sec
