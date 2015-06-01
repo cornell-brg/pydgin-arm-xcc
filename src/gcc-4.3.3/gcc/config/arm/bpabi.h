@@ -57,9 +57,10 @@
 
 /* The generic link spec in elf.h does not support shared libraries.  */
 #undef  LINK_SPEC
+/* berkin: we need to use our custom brgarm.ld loader script */
 #define LINK_SPEC "%{mbig-endian:-EB} %{mlittle-endian:-EL} "		\
   "%{static:-Bstatic} %{shared:-shared} %{symbolic:-Bsymbolic} "	\
-  "-X"
+  "-X -Tbrgarm.ld"
 
 #if defined (__thumb__)
 #define RENAME_LIBRARY_SET ".thumb_set"
