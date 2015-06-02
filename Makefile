@@ -38,8 +38,8 @@ BINUTILS_MAKEFILE = $(BINUTILS_BUILD_DIR)/Makefile
 
 build-binutils: $(BINUTILS_MAKEFILE)
 	cd $(BINUTILS_BUILD_DIR) && \
-	make -j && \
-	make install
+	make $(MAKEFLAGS) && \
+	make $(MAKEFLAGS) install
 
 $(BINUTILS_MAKEFILE): | $(BINUTILS_BUILD_DIR)
 	cd $(BINUTILS_BUILD_DIR) && \
@@ -70,8 +70,8 @@ GCC_CONFIGURE_FLAGS = $(COMMON_CONFIGURE_FLAGS) \
 
 build-gcc: build-binutils $(GCC_MAKEFILE)
 	cd $(GCC_BUILD_DIR) && \
-	make -j && \
-	make install
+	make $(MAKEFLAGS) && \
+	make $(MAKEFLAGS) install
 
 $(GCC_MAKEFILE): | $(GCC_BUILD_DIR)
 	cd $(GCC_BUILD_DIR) && \
@@ -95,8 +95,8 @@ NEWLIB_MAKEFILE = $(NEWLIB_BUILD_DIR)/Makefile
 build-newlib: build-binutils build-gcc $(NEWLIB_MAKEFILE)
 	cd $(NEWLIB_BUILD_DIR) && \
 	export PATH=$(PREFIX)/bin:$$PATH && \
-	make -j && \
-	make install
+	make $(MAKEFLAGS) && \
+	make $(MAKEFLAGS) install
 
 $(NEWLIB_MAKEFILE): | $(NEWLIB_BUILD_DIR)
 	cd $(NEWLIB_BUILD_DIR) && \
