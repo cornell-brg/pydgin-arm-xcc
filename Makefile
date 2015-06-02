@@ -25,7 +25,7 @@ NEWLIB_LIBC_HEADER_DIR = $(NEWLIB_DIR)/newlib/libc/include
 GMP_INSTALL_DIR = $(GMP_DIR)/install
 MPFR_INSTALL_DIR = $(MPFR_DIR)/install
 
-build-all: build-binutils build-gmp build-mpfr build-gcc build-newlib
+build-all: build-newlib
 
 clean: clean-binutils clean-gmp clean-mpfr clean-gcc clean-newlib
 
