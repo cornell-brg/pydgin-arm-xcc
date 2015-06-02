@@ -122,6 +122,7 @@ GCC_CONFIGURE_FLAGS = $(COMMON_CONFIGURE_FLAGS) \
 
 build-gcc: build-binutils build-gmp build-mpfr $(GCC_MAKEFILE)
 	cd $(GCC_BUILD_DIR) && \
+	export LD_LIBRARY_PATH=$(GMP_INSTALL_DIR)/lib:$(MPFR_INSTALL_DIR)/lib:$$LD_LIBRARY_PATH && \
 	make $(MAKEFLAGS) && \
 	make $(MAKEFLAGS) install
 
